@@ -1,6 +1,6 @@
 # `postgres-shift`
 
-A simple forwards only migration solution for postgres using [Postgres.js](https://github.com/porsager/postgres).
+A simple forwards only migration solution for [postgres.js](https://github.com/porsager/postgres).
 
 `postgres-shift` 
 
