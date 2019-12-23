@@ -1,5 +1,5 @@
 const shift = require('../index.js')
-const postgres = require('peegee')
+const postgres = require('postgres')
 const cp = require('child_process')
 const path = require('path')
 
@@ -18,4 +18,7 @@ sql.begin(sql =>
   })
 )
 .then(() => console.log('All good'))
-.catch(err => console.log('Oh noes', err))
+.catch(err => {
+  console.error('Failed', err)
+  process.exit(1)
+})
