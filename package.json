@@ -1,0 +1,31 @@
+{
+  "name": "postgres-shift",
+  "version": "0.0.2",
+  "description": "A simple forwards only migration solution for [postgres.js](https://github.com/porsager/postgres)",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node tests/index.js"
+  },
+  "files": [
+    "/index.js"
+  ],
+  "author": "Rasmus Porsager <rasmus@porsager.com>",
+  "license": "WTFPL",
+  "repository": "porsager/postgres",
+  "keywords": [
+    "driver",
+    "postgresql",
+    "postgres.js",
+    "postgres",
+    "postgre",
+    "client",
+    "sql",
+    "db",
+    "pg",
+    "database"
+  ],
+  "devDependencies": {
+    "postgres": "1.0.0"
+  }
+}
