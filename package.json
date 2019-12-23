@@ -12,7 +12,7 @@
   ],
   "author": "Rasmus Porsager <rasmus@porsager.com>",
   "license": "WTFPL",
-  "repository": "porsager/postgres",
+  "repository": "porsager/postgres-shift",
   "keywords": [
     "driver",
     "postgresql",
