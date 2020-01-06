@@ -27,6 +27,6 @@
     "database"
   ],
   "devDependencies": {
-    "postgres": "1.0.0"
+    "postgres": "1.0.1"
   }
 }
