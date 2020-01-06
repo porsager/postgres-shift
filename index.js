@@ -71,12 +71,16 @@ module.exports = async function({
 
   function ensureMigrationsTable() {
     return sql`
-      create table if not exists migrations (
-        migration_id serial primary key,
-        created_at timestamp with time zone not null default now(),
-        name text
-      )
-    `
+      select 'migrations'::regclass
+    `.catch((err) =>
+      sql`
+        create table migrations (
+          migration_id serial primary key,
+          created_at timestamp with time zone not null default now(),
+          name text
+        )
+      `
+    )
   }
 
 }
