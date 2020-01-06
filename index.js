@@ -28,20 +28,20 @@ module.exports = async function({
   const current = await getCurrentMigration()
   const needed = migrations.slice(current ? current.id : 0)
 
-  return next()
+  return sql.begin(next)
 
-  async function next() {
+  async function next(sql) {
     const current = needed.shift()
     if (!current)
       return
 
     before && before(current)
-    await run(current)
+    await run(sql, current)
     after && after(current)
-    await next()
+    await next(sql)
   }
 
-  async function run({
+  async function run(sql, {
     path,
     migration_id,
     name
@@ -72,15 +72,13 @@ module.exports = async function({
   function ensureMigrationsTable() {
     return sql`
       select 'migrations'::regclass
-    `.catch((err) =>
-      sql`
-        create table migrations (
-          migration_id serial primary key,
-          created_at timestamp with time zone not null default now(),
-          name text
-        )
-      `
-    )
+    `.catch((err) => sql`
+      create table migrations (
+        migration_id serial primary key,
+        created_at timestamp with time zone not null default now(),
+        name text
+      )
+    `)
   }
 
 }

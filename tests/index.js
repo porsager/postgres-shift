@@ -11,12 +11,10 @@ const sql = postgres({
   timeout: 1
 })
 
-sql.begin(sql =>
-  shift({
-    sql,
-    path: path.join(__dirname, 'migrations')
-  })
-)
+shift({
+  sql,
+  path: path.join(__dirname, 'migrations')
+})
 .then(() => console.log('All good'))
 .catch(err => {
   console.error('Failed', err)
