@@ -1,9 +1,9 @@
-const fs = require('fs')
-const path = require('path')
+import fs from 'fs'
+import path from 'path'
 
 const join = path.join
 
-module.exports = async function({
+export default async function({
   sql,
   path = join(process.cwd(), 'migrations'),
   before = null,
@@ -48,7 +48,7 @@ module.exports = async function({
   }) {
     fs.existsSync(join(path, 'index.sql')) && !fs.existsSync(join(path, 'index.js'))
       ? await sql.file(join(path, 'index.sql'))
-      : await require(join(path, 'index.js'))(sql) // eslint-disable-line
+      : await import(join(path, 'index.js')).then(x => x.default(sql)) // eslint-disable-line
 
     await sql`
       insert into migrations (

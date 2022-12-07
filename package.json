@@ -3,7 +3,7 @@
   "version": "0.0.4",
   "description": "A simple forwards only migration solution for [postgres.js](https://github.com/porsager/postgres)",
   "main": "index.js",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
     "test": "node tests/index.js"
   },
@@ -27,6 +27,6 @@
     "database"
   ],
   "devDependencies": {
-    "postgres": "1.0.1"
+    "postgres": "3.3.2"
   }
 }

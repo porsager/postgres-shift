@@ -1,4 +1,4 @@
-module.exports = async(sql) => {
+export default async function(sql) {
   await sql`
     alter table test add column c timestamp with time zone
   `
