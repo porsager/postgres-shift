@@ -10,7 +10,7 @@ export default async function({
   after = null
 }) {
   const migrations = fs.readdirSync(path)
-    .filter(x => fs.statSync(join(path, x)).isDirectory() && x.match(/^[0-9]{5}_/))
+    .filter(x => (fs.statSync(join(path, x)).isDirectory() || fs.statSync(join(path, x)).isFile()) && x.match(/^[0-9]{5}_/))
     .sort()
     .map(x => ({
       path: join(path, x),
@@ -46,10 +46,15 @@ export default async function({
     migration_id,
     name
   }) {
-    fs.existsSync(join(path, 'index.sql')) && !fs.existsSync(join(path, 'index.js'))
-      ? await sql.file(join(path, 'index.sql'))
-      : await import(join(path, 'index.js')).then(x => x.default(sql)) // eslint-disable-line
-
+    if (fs.statSync(path).isFile()) {
+      path.endsWith('.sql')
+        ? await sql.file(path)
+        : await import(path).then(x => x.default(sql)) // eslint-disable-line
+    } else if (fs.statSync(path).isDirectory()) {
+      fs.existsSync(join(path, 'index.sql')) && !fs.existsSync(join(path, 'index.js'))
+        ? await sql.file(join(path, 'index.sql'))
+        : await import(join(path, 'index.js')).then(x => x.default(sql)) // eslint-disable-line
+    }
     await sql`
       insert into migrations (
         migration_id,
