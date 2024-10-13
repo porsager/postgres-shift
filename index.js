@@ -28,17 +28,19 @@ export default async function({
   const current = await getCurrentMigration()
   const needed = migrations.slice(current ? current.id : 0)
 
-  return sql.begin(next)
+  return next()
 
-  async function next(sql) {
+  async function next() {
     const current = needed.shift()
     if (!current)
       return
 
-    before && before(current)
-    await run(sql, current)
-    after && after(current)
-    await next(sql)
+    await sql.begin(async (sql) => {
+      before && before(current)
+      await run(sql, current)
+      after && after(current)
+    })
+    await next()
   }
 
   async function run(sql, {
