@@ -2,13 +2,15 @@
   "name": "postgres-shift",
   "version": "0.1.0",
   "description": "A simple forwards only migration solution for [postgres.js](https://github.com/porsager/postgres)",
-  "main": "index.js",
+  "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "test": "node tests/index.js"
+    "test": "node tests/index.js",
+    "build": "tsup",
+    "check-exports": "attw --pack ."
   },
   "files": [
-    "/index.js"
+    "dist"
   ],
   "author": "Rasmus Porsager <rasmus@porsager.com>",
   "license": "WTFPL",
@@ -27,6 +29,17 @@
     "database"
   ],
   "devDependencies": {
-    "postgres": "3.3.2"
+    "@arethetypeswrong/cli": "^0.16.4",
+    "@types/node": "^22.8.6",
+    "postgres": "3.3.2",
+    "tsup": "^8.3.5",
+    "typescript": "^5.6.3"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "import": "./dist/index.js",
+      "default": "./dist/index.cjs"
+    }
   }
 }

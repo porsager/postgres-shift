@@ -1,13 +1,26 @@
-import fs from 'fs'
-import path from 'path'
+import * as fs from 'fs'
+import * as path from 'path'
+
+import type { Sql } from 'postgres'
 
 const join = path.join
 
-export default async function({
+type Migration = {
+  path: string;
+  migration_id: number;
+  name: string;
+}
+
+export default async function ({
   sql,
   path = join(process.cwd(), 'migrations'),
-  before = null,
-  after = null
+  before,
+  after
+}: {
+  sql: Sql;
+  path: string;
+  before?: (m: Migration) => void;
+  after?: (m: Migration) => void;
 }) {
   const migrations = fs.readdirSync(path)
     .filter(x => fs.statSync(join(path, x)).isDirectory() && x.match(/^[0-9]{5}_/))
@@ -28,24 +41,22 @@ export default async function({
   const current = await getCurrentMigration()
   const needed = migrations.slice(current ? current.id : 0)
 
-  return sql.begin(next)
-
-  async function next(sql) {
+  async function next(sql: Sql) {
     const current = needed.shift()
-    if (!current)
+    if (!current) {
       return
-
-    before && before(current)
+    }
+    before?.(current)
     await run(sql, current)
-    after && after(current)
+    after?.(current)
     await next(sql)
   }
 
-  async function run(sql, {
+  async function run(sql: Sql, {
     path,
     migration_id,
     name
-  }) {
+  }: Migration) {
     fs.existsSync(join(path, 'index.sql')) && !fs.existsSync(join(path, 'index.js'))
       ? await sql.file(join(path, 'index.sql'))
       : await import(join(path, 'index.js')).then(x => x.default(sql)) // eslint-disable-line
@@ -61,7 +72,7 @@ export default async function({
     `
   }
 
-  function getCurrentMigration() {
+  async function getCurrentMigration() {
     return sql`
       select migration_id as id from migrations
       order by migration_id desc
@@ -69,7 +80,7 @@ export default async function({
     `.then(([x]) => x)
   }
 
-  function ensureMigrationsTable() {
+  async function ensureMigrationsTable() {
     return sql`
       select 'migrations'::regclass
     `.catch((err) => sql`
@@ -81,4 +92,5 @@ export default async function({
     `)
   }
 
+  return sql.begin(next)
 }

@@ -1,4 +1,4 @@
-import shift from '../index.js'
+import shift from '../dist/index.js'
 import postgres from 'postgres'
 import cp from 'child_process'
 import { fileURLToPath } from 'url'
