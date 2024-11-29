@@ -48,7 +48,7 @@ export default async function({
   }) {
     fs.existsSync(join(path, 'index.sql')) && !fs.existsSync(join(path, 'index.js'))
       ? await sql.file(join(path, 'index.sql'))
-      : await import(join(path, 'index.js')).then(x => x.default(sql)) // eslint-disable-line
+      : await import(join(process.cwd(), path, 'index.js')).then(x => x.default(sql)) // eslint-disable-line
 
     await sql`
       insert into migrations (
