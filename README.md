@@ -72,6 +72,7 @@ shift({
     before: ({ migration_id, name }) => {
         console.log('Migrating', migration_id, name);
     },
+    transactionPerEachMigration: true, // defaults to false
 })
     .then(() => console.log('All good'))
     .catch((err) => {
