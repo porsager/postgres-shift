@@ -7,7 +7,8 @@ export default async function({
   sql,
   path = join(process.cwd(), 'migrations'),
   before = null,
-  after = null
+  after = null,
+  transactionPerEachMigration = false
 }) {
   const migrations = fs.readdirSync(path)
     .filter(x => (fs.statSync(join(path, x)).isDirectory() || fs.statSync(join(path, x)).isFile()) && x.match(/^[0-9]{5}_/))
@@ -28,17 +29,27 @@ export default async function({
   const current = await getCurrentMigration()
   const needed = migrations.slice(current ? current.id : 0)
 
-  return sql.begin(next)
+  return transactionPerEachMigration ? next(sql) : sql.begin(next)
 
   async function next(sql) {
     const current = needed.shift()
     if (!current)
       return
 
+    if (transactionPerEachMigration) {
+      await sql.begin(async (sql) => {
+        await step(sql, current);
+      })
+    } else {
+      await step(sql, current);
+    }
+    await next(sql)
+  }
+
+  async function step(sql, current) {
     before && before(current)
     await run(sql, current)
     after && after(current)
-    await next(sql)
   }
 
   async function run(sql, {
