@@ -25,8 +25,19 @@ export default async function({
 
   const latest = migrations[migrations.length - 1]
 
-  if (latest.migration_id !== migrations.length)
-    throw new Error('Inconsistency in migration numbering')
+  if (latest.migration_id !== migrations.length) {
+    let numbers = []
+
+    for (const [i, m] of migrations.entries()) {
+      if (i === 0 || i + 1 === migrations.length)
+        continue
+
+      if (m.migration_id + 1 !== migrations[i + 1].migration_id)
+        numbers.push(m.migration_id)
+    }
+
+    throw new Error('Inconsistency in migration numbering at: ' + numbers.map(x => x).join(', '))
+  }
 
   await ensureMigrationsTable()
 
