@@ -1,22 +1,26 @@
 import fs from 'fs'
-import path from 'path'
-
-const join = path.join
+import { dirname, join, resolve } from 'path'
 
 export default async function({
   sql,
   path = join(process.cwd(), 'migrations'),
   before = null,
-  after = null
+  after = null,
+  deploy = false
 }) {
+  deploy = deploy && resolve(dirname(path), deploy === true ? 'deployed' : deploy)
+
   const migrations = fs.readdirSync(path)
-    .filter(x => (fs.statSync(join(path, x)).isDirectory() || fs.statSync(join(path, x)).isFile()) && x.match(/^[0-9]{5}_/))
+    .concat(deploy && fs.existsSync(deploy) ? fs.readdirSync(deploy) : [])
+    .filter(x => x.match(/^[0-9]{5}_/))
     .sort()
     .map(x => ({
-      path: join(path, x),
+      file: x,
+      path: join(deploy && fs.existsSync(join(deploy, x)) ? deploy : path, x),
       migration_id: parseInt(x.slice(0, 5)),
       name: x.slice(6).replace(/-/g, ' ')
     }))
+    .filter(({ path }) => fs.statSync(path).isDirectory() || fs.statSync(path).isFile())
 
   const latest = migrations[migrations.length - 1]
 
@@ -28,7 +32,12 @@ export default async function({
   const current = await getCurrentMigration()
   const needed = migrations.slice(current ? current.id : 0)
 
-  return sql.begin(next)
+  await sql.begin(next)
+
+  if (deploy) {
+    fs.mkdirSync(deploy, { recursive: true })
+    migrations.forEach(x => fs.renameSync(x.path, join(deploy, x.file)))
+  }
 
   async function next(sql) {
     const current = needed.shift()
@@ -55,6 +64,7 @@ export default async function({
         ? await sql.file(join(path, 'index.sql'))
         : await import(join(path, 'index.js')).then(x => x.default(sql)) // eslint-disable-line
     }
+
     await sql`
       insert into migrations (
         migration_id,
@@ -85,5 +95,4 @@ export default async function({
       )
     `)
   }
-
 }
