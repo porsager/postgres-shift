@@ -6,7 +6,8 @@ export default async function({
   path = join(process.cwd(), 'migrations'),
   before = null,
   after = null,
-  deploy = false
+  deploy = false,
+  deployed = false
 }) {
   deploy = deploy && resolve(dirname(path), deploy === true ? 'deployed' : deploy)
 
@@ -34,7 +35,7 @@ export default async function({
 
   await sql.begin(next)
 
-  if (deploy) {
+  if (deployed) {
     fs.mkdirSync(deploy, { recursive: true })
     migrations.forEach(x => fs.renameSync(x.path, join(deploy, x.file)))
   }
